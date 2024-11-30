@@ -50,7 +50,7 @@ public class PostTests {
             "ы,true, true"
     })
     @DisplayName("Negative: Создание элемента по негативным данным")
-    public void createTodoNegativeTest(String id, String desc, boolean type) {
+    public void createTodoNegativeTest(String id) {
         TestService testService = new TestService(Config.get("BASE_URL"));
 
         JSONObject jsonObject = new JSONObject();
@@ -64,6 +64,50 @@ public class PostTests {
 
         assertEquals(400, response.getCode(), "Expected status code is 400");
         assertTrue(response.getWrapperBody().getBody().contains("Request body deserialize error: invalid type:"));
+    }
+
+
+    @ParameterizedTest
+    @CsvSource({
+            "10",
+            "100",
+            "1000"
+    })
+    @DisplayName("Performance: Измерение времени выполнения POST /todos")
+    public void measurePostTodoPerformanceTest(int requestCount) {
+        TestService testService = new TestService(Config.get("BASE_URL"));
+        Random random = new Random();
+
+        long totalTime = 0;
+        int successfulRequests = 0;
+
+        for (int i = 0; i < requestCount; i++) {
+            int randomId = random.nextInt(1000);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("id", randomId);
+            jsonObject.put("text", "Performance test " + randomId);
+            jsonObject.put("completed", random.nextBoolean());
+
+            long startTime = System.currentTimeMillis();
+
+            var response = testService.postController().postTodo("/todos", jsonObject);
+
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            totalTime += elapsedTime;
+
+            if (response.code() == 201) {
+                successfulRequests++;
+            }
+        }
+
+        double averageTime = (double) totalTime / requestCount;
+
+        System.out.printf("Сводка теста:%n");
+        System.out.printf("Количество запросов: %d%n", requestCount);
+        System.out.printf("Среднее время отклика: %.2f мс%n", averageTime);
+        System.out.printf("Успешных запросов (код 201): %d%n", successfulRequests);
+
+        assertTrue(averageTime < 500, "Среднее время отклика превышает 500 мс");
     }
 
 }

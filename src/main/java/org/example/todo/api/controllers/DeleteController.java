@@ -16,13 +16,13 @@ public class DeleteController extends BaseController {
         super(httpClient, headers);
     }
 
-    @Step("Отправить данные на тачку {0}")
+    @Step("Отправить запрос на удаление {0}")
     public Response deleteTodo(String endpoint, int id) {
         Response response = httpClient.sendDelete(endpoint, id);
         return response;
     }
 
-    @Step("Отправить некорректные данные на тачку {0}")
+    @Step("Отправить некорректный запрос на удаление {0}")
     public Response sendWrongDelete(String endpoint, String id, String cred) {
         Response response = httpClient.sendWrongDelete(endpoint, id, cred);
         return response;
