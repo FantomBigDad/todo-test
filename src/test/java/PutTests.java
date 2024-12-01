@@ -34,7 +34,7 @@ public class PutTests {
         jsonObject.put("completed", true);
 
         testService
-                .putController()
+                .postController()
                 .postTodo("/todos", jsonObject);
 
         int newRandomId = random.nextInt(1000);
@@ -54,7 +54,6 @@ public class PutTests {
                 .takeTodo("/todos");
 
         assertTrue(new JsonUtils().checkJson(checkResp, newRandomId, desc, type), "Не найденно тело с его изменениями");
-
     }
 
 
@@ -63,7 +62,7 @@ public class PutTests {
             "-1, test change, kek",
             "@@@, , false",
     })
-    @DisplayName("Positive: Попытка выставить невалидные параметры")
+    @DisplayName("Negative: Попытка выставить невалидные параметры")
     public void updateTodoNegativeTest(String id, String desc, String type) throws JsonProcessingException {
         TestService testService = new TestService(Config.get("BASE_URL"));
         Random random = new Random();
@@ -75,7 +74,7 @@ public class PutTests {
         jsonObject.put("completed", true);
 
         testService
-                .putController().postTodo("/todos", jsonObject);
+                .postController().postTodo("/todos", jsonObject);
 
         JSONObject newJsonObject = new JSONObject();
         newJsonObject.put("id", id);
@@ -87,5 +86,35 @@ public class PutTests {
                 .putTodoInvalid("/todos/" + randomId, newJsonObject);
 
         assertEquals(401, response.getCode(), "Expected status code is 401");
+    }
+
+    @Test
+    @DisplayName("Negative: Обновление данные элемента")
+    public void updateTodoWichWrongIdNegativeTest() throws JsonProcessingException {
+        TestService testService = new TestService(Config.get("BASE_URL"));
+        Random random = new Random();
+        int randomId = random.nextInt(1000);
+        ResponseWrapper<List<Todo>> response = testService
+                .getController()
+                .takeTodo("/todos");
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", randomId);
+        jsonObject.put("text", "test");
+        jsonObject.put("completed", true);
+        testService
+                .postController()
+                .postTodo("/todos", jsonObject);
+
+        JSONObject newJsonObject = new JSONObject();
+        newJsonObject.put("id", response.getWrapperBody().getBody().get(0).getId());
+        newJsonObject.put("text", "desc");
+        newJsonObject.put("completed", false);
+
+        var resp = testService
+                .putController()
+                .putTodo("/todos/" + randomId, newJsonObject);
+
+        assertEquals(400, resp.code(), "Expected status code is 400");
     }
 }

@@ -9,18 +9,18 @@ import org.json.JSONObject;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class PostTests {
-
+public class PostTests extends BaseTest {
 
     @ParameterizedTest
     @CsvSource({
             "12, true",
-            "s, false",
+            "long long long long long long long long long long long long long long long long, false",
             "@@@@, false",
             "true, true"
     })
@@ -28,7 +28,7 @@ public class PostTests {
     public void createTodoPositiveTest(String desc, boolean type) {
         TestService testService = new TestService(Config.get("BASE_URL"));
         Random random = new Random();
-        int randomId = random.nextInt(1000);
+        int randomId = random.nextInt(10000);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", randomId);
@@ -44,19 +44,19 @@ public class PostTests {
 
     @ParameterizedTest
     @CsvSource({
-            "1.2 , 1, true",
-            "-1,ssssss, false",
-            "s, , false",
-            "ы,true, true"
+            "1.2 , 1, ",
+            "-1,ssssss, !",
+            "s, , kek",
+            "ы,true, 10"
     })
     @DisplayName("Negative: Создание элемента по негативным данным")
-    public void createTodoNegativeTest(String id) {
+    public void createTodoNegativeTest(String id, String desc, String type) {
         TestService testService = new TestService(Config.get("BASE_URL"));
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", id);
-        jsonObject.put("text", "test");
-        jsonObject.put("completed", false);
+        jsonObject.put("text", desc);
+        jsonObject.put("completed", type);
 
 
         var response = testService
@@ -66,6 +66,25 @@ public class PostTests {
         assertTrue(response.getWrapperBody().getBody().contains("Request body deserialize error: invalid type:"));
     }
 
+    @Test
+    @DisplayName("Negative: Создать элемент по существующему ID")
+    public void createTodoWichWrongIdNegativeTest() {
+        TestService testService = new TestService(Config.get("BASE_URL"));
+        ResponseWrapper<List<Todo>> respId = testService
+                .getController()
+                .takeTodo("/todos");
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", respId.getWrapperBody().getBody().get(0).getId());
+        jsonObject.put("text", "desc");
+        jsonObject.put("completed", true);
+
+        var response = testService
+                .postController().postTodo("/todos", jsonObject);
+
+        assertEquals(400, response.code(), "Expected status code is 400");
+    }
+
 
     @ParameterizedTest
     @CsvSource({
@@ -73,7 +92,7 @@ public class PostTests {
             "100",
             "1000"
     })
-    @DisplayName("Performance: Измерение времени выполнения POST /todos")
+    @DisplayName("Performance: Нагрузка POST /todos")
     public void measurePostTodoPerformanceTest(int requestCount) {
         TestService testService = new TestService(Config.get("BASE_URL"));
         Random random = new Random();

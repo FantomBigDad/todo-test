@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class GetTests {
 
     @Test
-    @DisplayName("Positive: Получение заметок 1")
+    @DisplayName("Positive: Получение заметок")
     public void getTodosPositiveTest() {
         TestService testService = new TestService(Config.get("BASE_URL"));
         ResponseWrapper<List<Todo>> response = testService.getController().takeTodo("/todos");
@@ -32,7 +32,7 @@ public class GetTests {
             "1, 3",
             "0, 0",
     })
-    @DisplayName("Positive: Получение офсетов 2")
+    @DisplayName("Positive: Получение офсетов")
     public void getTodosPositiveOffsetsTest(int offset, int limit) {
         TestService testService = new TestService(Config.get("BASE_URL"));
         ResponseWrapper<List<Todo>> response;
@@ -56,7 +56,7 @@ public class GetTests {
             "s, l",
             "-1, +1000"
     })
-    @DisplayName("Negative: Получение офсетов по негативным данным 3")
+    @DisplayName("Negative: Получение офсетов по негативным данным")
     public void getTodosNegativeOffsetsTest(String offset, String limit) {
         TestService testService = new TestService(Config.get("BASE_URL"));
         ResponseWrapper<String> response;

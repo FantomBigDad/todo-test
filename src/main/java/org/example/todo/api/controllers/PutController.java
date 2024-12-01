@@ -11,12 +11,6 @@ public class PutController extends BaseController {
     public PutController(HttpClient httpClient, Headers headers) {
         super(httpClient, headers);
     }
-
-    @Step("Отправить данные на тачку {0}")
-    public Response postTodo(String endpoint, JSONObject body) {
-        Response response = httpClient.sendPost(endpoint, body);
-        return response;
-    }
     @Step("Отправить измененные данные на тачку {0}")
     public Response putTodo(String endpoint, JSONObject body) {
         Response response = httpClient.sendPut(endpoint, body);

@@ -16,13 +16,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DeleteTests {
+
     @Test
     @DisplayName("Positive: Удаление элемента")
     public void deleteTodoPositiveTest() throws IOException {
         TestService testService = new TestService(Config.get("BASE_URL"));
 
         Random random = new Random();
-        int randomId = random.nextInt(1000);
+        int randomId = random.nextInt(10000);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", randomId);
