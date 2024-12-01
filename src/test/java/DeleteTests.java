@@ -43,6 +43,33 @@ public class DeleteTests {
         assertFalse(new JsonUtils().checkJson(checkResp, randomId, "Test from del", true), "Не найденно тело с его изменениями");
     }
 
+    @Test
+    @DisplayName("Positive: Повторное удаление элемента")
+    public void deleteTodoAgainPositiveTest() throws IOException {
+        TestService testService = new TestService(Config.get("BASE_URL"));
+
+        Random random = new Random();
+        int randomId = random.nextInt(1000);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", randomId);
+        jsonObject.put("text", "Test from del");
+        jsonObject.put("completed", true);
+
+        testService
+                .postController().postTodo("/todos", jsonObject);
+
+        var response = testService
+                .deleteController()
+                .deleteTodo("/todos", randomId);
+        assertEquals(204, response.code());
+
+        var responseSecond = testService
+                .deleteController()
+                .deleteTodo("/todos", randomId);
+        assertEquals(404, responseSecond.code());
+    }
+
     @ParameterizedTest
     @CsvSource({
             "99999999999999",
