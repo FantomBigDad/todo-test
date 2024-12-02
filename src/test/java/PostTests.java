@@ -42,6 +42,30 @@ public class PostTests extends BaseTest {
         assertEquals(201, response.code(), "Expected status code is 201");
     }
 
+    @Test
+    @DisplayName("Negative: Попытка создание дубликата")
+    public void createTodoDuplicateNegativeTest() {
+        TestService testService = new TestService(Config.get("BASE_URL"));
+        Random random = new Random();
+        int randomId = random.nextInt(10000);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", randomId);
+        jsonObject.put("text", "dublicate");
+        jsonObject.put("completed", false);
+
+
+        var response = testService
+                .postController().postTodo("/todos", jsonObject);
+
+        assertEquals(201, response.code(), "Expected status code is 201");
+
+        var resp = testService
+                .postController().postTodo("/todos", jsonObject);
+
+        assertEquals(400, resp.code(), "Expected status code is 400");
+    }
+
     @ParameterizedTest
     @CsvSource({
             "1.2 , 1, ",
